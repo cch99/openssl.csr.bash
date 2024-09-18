@@ -1,11 +1,23 @@
 #!/bin/bash
-site_name="example.com"
-email_address="webmaster@$site_name"
-organization="$site_name"
-organizational_unit="$site_name"
+#get the domain from as a command line argument
+domain=$1
+#make the filename for the key and csr have year after the domain
+year=$(date +"%Y")
+fileprefix=$domain.$year
+if [ -z "$domain" ]
+then
+    echo "Argument not present."
+    echo "Useage $0 [common name]"
+
+    exit 99
+fi
+site_name=$domain
+email_address="admin@somewhere.com"
+organization="ACME"
+organizational_unit="IT"
 country="US"
-state="AR"
-city="Fayetteville"
+state="Alabama"
+city="Zip City"
 
 use_subject_alternative_names=true
 
@@ -16,12 +28,6 @@ use_subject_alternative_names=true
 # failure to include CN as one of the SANs will result in certificate errors in some browsers
 declare -a subject_alternative_names=(
   "$site_name"
-  "www.$site_name"
-  "dev.$site_name"
-  "test.$site_name"
-  "*.$site_name"
-  "example.net"
-  "example.org"
 )
 
 set -e
@@ -30,7 +36,7 @@ if [ ! -d outssl ]; then
   mkdir outssl
 fi
 
-command="openssl req -new -nodes -sha256 -newkey rsa:2048 -keyout \"outssl/$site_name.key\" -out \"outssl/$site_name.csr\" -subj \"/emailAddress=$email_address/CN=$site_name/O=$organization/OU=$organizational_unit/C=$country/ST=$state/L=$city\""
+command="openssl req -new -nodes -sha256 -newkey rsa:2048 -keyout \"outssl/$fileprefix.key\" -out \"outssl/$fileprefix.csr\" -subj \"/emailAddress=$email_address/CN=$site_name/O=$organization/OU=$organizational_unit/C=$country/ST=$state/L=$city\""
 
 if $use_subject_alternative_names; then
 
@@ -52,5 +58,5 @@ if $use_subject_alternative_names; then
   command="$command -reqexts SAN -config <(cat \"$opensslcnf\" <(printf \"[SAN]\nsubjectAltName=$sanstring\"))"
 
 fi
-
+echo $command
 eval "$command"
