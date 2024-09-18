@@ -16,7 +16,7 @@ change the variables at the top of `openssl.csr.bash` to match your needs: `site
 
 execute the script
 
-    ./openssl.csr.bash roadrunner.acme.com
+    ./openssl.csr.bash example.com
 
 ## inspect certificate signing request
 
